@@ -1,0 +1,14 @@
+name = "verbose_manual"
+defaultTargets = ["docs"]
+
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso"
+rev = "nightly-testing"
+
+[[lean_lib]]
+name = "VerboseManual"
+
+[[lean_exe]]
+name = "docs"
+root = "VerboseManualMain"
