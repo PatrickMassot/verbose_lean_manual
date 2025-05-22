@@ -1,45 +1,18 @@
 # Demonstration Verbose Documentation
 
-## What is This?
+This is the manual for Verbose Lean4. It consists of two Lean packages:
+ * `examples` contains example code used in the documentation
+ * `manual` contains the documentation itself
 
-This is a demonstration of documentation for a Lean package, built in Verso's manual genre.
+The examples rely on Mathlib. Before working on it, please run `lake exe cache get` in `examples`.
 
-To build it, run:
+To build the documentation, enter `manual` and run:
 ```
-$ lake exe packagedocs --output _out/examples/packagedocs
+$ lake exe docs
 ```
 
-## Building Your Own
-
-To base your own book on it, copy the contents of this directory and add the following files:
-
-`lakefile.toml`:
-
-````
-name = "myprojectname"
-defaultTargets = ["docs"]
-
-[[require]]
-name = "verso"
-git = "https://github.com/leanprover/verso"
-rev = "nightly-testing"
-
-[[lean_lib]]
-name = "VerboseManual"
-
-[[lean_exe]]
-name = "docs"
-root = "VerboseManualMain"
-````
-
-`lean-toolchain`: use the same as [Verso's](../../lean-toolchain).
-
-
-In a sibling directory, copy the contents of [`../documented-package/`](../documented-package/).
-Make sure that it depends on the same version of `subverso` as the documentation, but the toolchains don't need to match.
-
-
-You can then build your documentation with:
+To view the documentation, you'll need a web server. Python provides one out of the box that can be run with a command such as:
 ```
-$ lake exe docs --output _out/html --depth 2
+$ python3 -m http.server 8000 --directory _out/html-multi/
 ```
+after which the document can be read at `http://localhost:8000`.

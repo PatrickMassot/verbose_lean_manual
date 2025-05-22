@@ -8,7 +8,7 @@ example (f : ℝ → ℝ) (u : ℕ → ℝ) (x₀ : ℝ)
    fun δ ⟨δ_pos, hδ⟩ ↦ (hu δ δ_pos).elim
      fun N hN ↦ ⟨N, fun n n_ge ↦ hδ (u n) <| hN n n_ge⟩
 
-
+-- ANCHOR: ContinuitySequentialContLean
 example (f : ℝ → ℝ) (u : ℕ → ℝ) (x₀ : ℝ)
     (hf : continuous_function_at f x₀) (hu : sequence_tendsto u x₀) :
     sequence_tendsto (f ∘ u) (f x₀) := by
@@ -20,10 +20,11 @@ example (f : ℝ → ℝ) (u : ℕ → ℝ) (x₀ : ℝ)
   apply hδ
   apply hN
   exact n_ge
+-- ANCHOR_END: ContinuitySequentialContLean
 
 -- Using controlled natural language but almost same level of help
 -- from Lean (difference: specify what `intro` means)
-
+-- ANCHOR: ContinuitySequentialCont
 Exercise "Continuity implies sequential continuity"
   Given: (f : ℝ → ℝ) (u : ℕ → ℝ) (x₀ : ℝ)
   Assume: (hu : u converges to x₀) (hf : f is continuous at x₀)
@@ -38,6 +39,7 @@ Proof:
   We apply Hu
   We conclude by n_ge
 QED
+-- ANCHOR_END: ContinuitySequentialCont
 
 -- Now using controlled natural language and less help from computer
 -- (no `We apply` without stating the new goal, and announce more
