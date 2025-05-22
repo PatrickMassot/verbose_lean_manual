@@ -24,131 +24,71 @@ set_option pp.rawOnError true
 -- This is the source of code examples to be shown in the document. It should be relative to the
 -- current Lake workspace. One good way to set up the files is in a Git repository that contains one
 -- Lake package for example code and another for the docs, as sibling directories.
-set_option verso.exampleProject "examples"
+set_option verso.exampleProject "../examples"
 
 -- This is the module that will be consulted for example code. It can be overridden using the
 -- `(module := ...)` argument to most elements that show code.
-set_option verso.exampleModule "VerboseManual"
+set_option verso.exampleModule "VerboseDemo.Examples"
 
-#doc (Manual) "Zippers: A Documentation Example" =>
+
+
+
+#doc (Manual) "Verbose Lean" =>
 %%%
-authors := ["David Thrane Christiansen"]
-shortTitle := "Zippers"
+authors := ["Patrick Massot"]
 %%%
 
-{index}[example]
-Here's an example project showing how to document a Lean package with Verso.
-It's a good idea to read the document's source together with the rendered output, because it demonstrates how to use various features.
+Here's some sample introductory text.
 
-This document's setup has the following properties:
- * It decouples the version of Lean used for Verso from that used by the library. This is important because it allows a library to stay on an older version of Lean while still adopting improvements to Verso that require new compiler versions.
- * The example code may use any Lean syntax, including custom syntax, and it will be highlighted correctly.
- * Examples to be included in the documentation are indicated with special comments.
+Verbose Lean allows controlled natural language to be used to write proofs, without compromising on the level of feedback provided by Lean.
+By default, a proof may look like this:
 
-The library here was chosen to be small.
-It is not intended as a realistic library, but rather to exercise certain interesting features.
-
-# Zippers
-
-A _zipper_{citep theZipper}[] is a purely-functional cursor into a data structure.
-They're equivalent to maintaining a description of a position (e.g. an index into a list or a series of left-right subtree decisions in a tree), but do not require traversing the prefix of the data structure.
-Zippers are efficient when many modifications to a persistent structure are concentrated near each other.
-
-:::paragraph
-In this example zipper library, a zipper for some type {anchorTerm Zipper}`α` is indicated with an instance of {anchorTerm Zipper}`Zipper`:
-
-```anchor Zipper
-class Zipper
-    (α : outParam (Type u)) (δ : outParam (Type w))
-    (ζ : Type v) where
-  move : ζ → δ → Option ζ
-  close : ζ → α
-  init : α → ζ
+```anchor ContinuitySequentialContLean
+example (f : ℝ → ℝ) (u : ℕ → ℝ) (x₀ : ℝ)
+    (hf : continuous_function_at f x₀) (hu : sequence_tendsto u x₀) :
+    sequence_tendsto (f ∘ u) (f x₀) := by
+  intro ε ε_pos
+  rcases hf ε ε_pos with ⟨δ, δ_pos, hδ⟩
+  rcases hu δ δ_pos with ⟨N, hN⟩
+  use N
+  intro n n_ge
+  apply hδ
+  apply hN
+  exact n_ge
 ```
 
-The type {anchorTerm Zipper}`δ` indicates the directions in which a zipper may move.
-:::
+With Verbose Lean, it can look like this:
 
-:::paragraph
-A lawful zipper is one in which initializing and closing zippers are inverse.
-A lawful zipper for some type {anchorTerm LawfulZipper}`α` is indicated with an instance of {anchorTerm LawfulZipper}`LawfulZipper`:
-
-```anchor LawfulZipper
-class LawfulZipper
-    (α : Type u) (δ : outParam (Type w)) (ζ : outParam (Type v))
-    extends Zipper α δ ζ where
-  init_close {x : α} : close (init x) = x
-  close_init {x : ζ} : close (init (close x)) = close x
-```
-:::
-
-:::paragraph
-There's some syntax for moving a zipper.
-The `⇰` operator attempts to move in a direction.
-Here's a list zipper in action:
-```anchor ex1
-def z1 : ListZipper Nat := Zipper.init [1, 2, 4]
-#eval z1 ⇰ .right
-```
-```anchorInfo ex1
-some { revBefore := [1], after := [2, 4] }
+```anchor ContinuitySequentialCont
+Exercise "Continuity implies sequential continuity"
+  Given: (f : ℝ → ℝ) (u : ℕ → ℝ) (x₀ : ℝ)
+  Assume: (hu : u converges to x₀) (hf : f is continuous at x₀)
+  Conclusion: (f ∘ u) converges to f x₀
+Proof:
+  Fix ε > 0
+  By hf applied to ε using ε_pos we get δ such that δ_pos and Hf
+  By hu applied to δ using δ_pos we get N such that Hu
+  Let's prove that N works
+  Fix n ≥ N
+  We apply Hf
+  We apply Hu
+  We conclude by n_ge
+QED
 ```
 
-```anchor ex2
-#eval show Option (List Nat) from do
-  let z ← z1 ⇰ .right
-  let z ← z ⇰ .right
-  let z := z.add 3
-  pure z.close
-```
-```anchorInfo ex2
-some [1, 2, 3, 4]
-```
-:::
+For instance, the line
 
-:::paragraph
-List zippers are defined as follows:
-```anchor ListZipper
-structure ListZipper (α) where
-  revBefore : List α
-  after : List α
-deriving Repr
-```
-They contain the reversed prefix to the current point and the suffix after it.
-To convert them back to a list, use {anchorName ListZipper.close (show:=close)}`ListZipper.close`:
-```anchor ListZipper.close
-def ListZipper.close (z : ListZipper α) : List α :=
-  close' z.revBefore z.after
-where
-  close'
-    | [], acc => acc
-    | x :: xs, acc => close' xs (x :: acc)
-```
-To add an element at the current position, use {anchorName ListZipper.add (show:=add)}`ListZipper.add`:
-```anchor ListZipper.add
-def ListZipper.add (x : α) (xs : ListZipper α) : ListZipper α :=
-  { xs with after := x :: xs.after }
-```
-:::
-
-:::paragraph
-Here's the instance:
-```anchor Dir
-inductive Dir where
-  | left | right
-```
-```anchor ListZipperInst
-instance : Zipper (List α) Dir (ListZipper α) where
-  move
-    | ⟨[], _⟩, .left => none
-    | ⟨x :: pre, post⟩, .left => some ⟨pre, x :: post⟩
-    | ⟨_, []⟩, .right => none
-    | ⟨pre, x :: post⟩, .right => some ⟨x :: pre, post⟩
-  close z := z.close
-  init xs := ⟨[], xs⟩
+```anchorTerm ContinuitySequentialCont
+By hf applied to ε using ε_pos we get δ such that δ_pos and Hf
 ```
 
-:::
+corresponds to
+
+```anchorTerm ContinuitySequentialContLean
+rcases hf ε ε_pos with ⟨δ, δ_pos, hδ⟩
+```
+
+
 
 {include 1 VerboseManual.DocFeatures}
 
