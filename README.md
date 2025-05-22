@@ -1,4 +1,6 @@
-# Demonstration Verbose Documentation
+# Verbose Lean Documentation stub
+
+Warning: this repository is work in progress that is very far from being useful yet.
 
 This is the manual for Verbose Lean4. It consists of two Lean packages:
  * `examples` contains example code used in the documentation
