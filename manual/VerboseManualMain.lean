@@ -21,4 +21,4 @@ def config : Config where
   emitHtmlMulti := true
   htmlDepth := 2
 
-def main := manualMain (%doc VerboseManual) (config := config)
+def main := manualMain (%doc VerboseManual) (config := config.addKaTeX)
