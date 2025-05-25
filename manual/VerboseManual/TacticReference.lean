@@ -24,6 +24,20 @@ htmlSplit := .never
 
 ## Basic tactics common to all styles
 
+
+### The `Fix` tactic
+
+This tactic allow to introduce data when the goal starts with `∀`.
+For instance if the goal if `∀ n : ℕ, n is even ⇒ n+1 is odd` then you can
+use `Fix n` or `Fix n : ℕ` to introduce a natural number named `n` in the local context and
+turn the goal into `n is even ⇒ n+1 is odd`.
+
+This tactic also handles bounded universal quantifiers. If the goal
+start with `∀ ε > 0` then you can write `Fix ε > 0`.
+This will introduce `ε` and also an assumption `ε_pos : ε > 0`.
+
+
+
 ## Traditional versions
 
 The traditional versions of Verbose Lean tactics are fairly close to the native Lean tactics.
